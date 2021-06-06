@@ -21,16 +21,18 @@ namespace Sender_Digital_Signature_
 
         SimpleTcpClient client;
         Encoding encoding = Encoding.GetEncoding("437");
+        RSAParameters Key;
 
         public string HashAndSignBytes()
         {
             try
             {
+                Key = new RSAParameters();
                 byte[] dataToSign = encoding.GetBytes(messageTextBox.Text);
 
                 RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider();
 
-                RSAParameters Key = RSAalg.ExportParameters(true);
+                Key = RSAalg.ExportParameters(true);
 
                 byte[] signedData = RSAalg.SignData(dataToSign, SHA256.Create());
 
@@ -46,9 +48,24 @@ namespace Sender_Digital_Signature_
             }
         }
 
-        public string doubleString()
+        public string correctedString()
         {
-            string sendThisString = messageTextBox.Text + "AtSkYrImaSA!@345f" + HashAndSignBytes();
+            string splitter = "AtSkYrImaSA!@345f";
+
+            string sendThisString = messageTextBox.Text + splitter + HashAndSignBytes();
+
+            string modulus = encoding.GetString(Key.Modulus);
+            string exponent = encoding.GetString(Key.Exponent);
+            string p = encoding.GetString(Key.P);
+            string q = encoding.GetString(Key.Q);
+            string d = encoding.GetString(Key.D);
+            string dp = encoding.GetString(Key.DP);
+            string dq = encoding.GetString(Key.DQ);
+            string inverseq = encoding.GetString(Key.InverseQ);
+
+            sendThisString += splitter + modulus + splitter + exponent + splitter + p
+                + splitter + q + splitter + d + splitter + dp + splitter + dq + splitter +
+                inverseq;
             return sendThisString;
         }
 
@@ -74,7 +91,7 @@ namespace Sender_Digital_Signature_
 
         private void sendButton_Click(object sender, EventArgs e)
         {
-            client.WriteLineAndGetReply(doubleString(), TimeSpan.FromSeconds(0));
+            client.WriteLineAndGetReply(correctedString(), TimeSpan.FromSeconds(0));
         }
     }
 }
