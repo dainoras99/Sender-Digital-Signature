@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleTCP;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,14 +18,24 @@ namespace Sender_Digital_Signature_
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
+        SimpleTcpClient client;
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            client = new SimpleTcpClient();
+            client.StringEncoder = Encoding.UTF8;
+        }
 
+
+        private void connectButton_Click(object sender, EventArgs e)
+        {
+            client.Connect(ipTextBox.Text, Convert.ToInt32(portTextBox.Text));
+            connectButton.Enabled = false;
+        }
+
+        private void sendButton_Click(object sender, EventArgs e)
+        {
+            client.WriteLineAndGetReply(messageTextBox.Text, TimeSpan.FromSeconds(3));
         }
     }
 }
